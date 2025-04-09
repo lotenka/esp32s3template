@@ -1,23 +1,31 @@
 dependencies:
   espressif/esp_modem:
     component_hash: e48da33fee082dd9d9a97a354a228057e07a14ac108766b40ad84e018205410a
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.1'
     source:
-      service_url: https://api.components.espressif.com/
+      registry_url: https://components.espressif.com/
       type: service
     version: 1.1.0
   espressif/led_strip:
     component_hash: 67d2744208e9c12d8b1992d21c979396c1726e57cb7e35e7c171c515be20f8ea
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.4'
     source:
-      service_url: https://api.components.espressif.com/
+      registry_url: https://components.espressif.com/
       type: service
     version: 2.5.3
   idf:
-    component_hash: null
     source:
       type: idf
-    version: 5.1.4
+    version: 5.1.6
   userbogd/esp_cron:
     component_hash: 3fe2d37fc6473034b4d8328d9a113465b2521b4284649fe29ac676025b6bd7b5
+    dependencies: []
     source:
       git: https://github.com/userbogd/esp_cron.git
       path: .
@@ -25,11 +33,18 @@ dependencies:
     version: 7266718a6be804ca280a6921795fc75e4d044eeb
   userbogd/ttn-esp32:
     component_hash: 46673f2091b28f3f22d594c77bc863ef52d4abeea3f3ecc5c4ba46c35e7a862d
+    dependencies: []
     source:
       git: https://github.com/userbogd/ttn-esp32.git
       path: .
       type: git
     version: b42825192c6455569f1a047b21140d6d1fe5e4ef
-manifest_hash: 4d4cb17db234a67f0eef5372d15aa4c784cf28c7cc9746b2442a01126ce5775c
+direct_dependencies:
+- espressif/esp_modem
+- espressif/led_strip
+- idf
+- userbogd/esp_cron
+- userbogd/ttn-esp32
+manifest_hash: c154592946066360bb55b9915185619cb33a9c1f9aad3b8aa162436353c89d2a
 target: esp32s3
-version: 1.0.0
+version: 2.0.0
