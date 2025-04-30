@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <driver/gpio.h>
 #include <driver/gptimer.h>
+#include <driver/ledc.h>
 #include <esp_err.h>
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
@@ -50,46 +51,32 @@ void app_main()
 
     LEDStripInit(CONFIG_LED_STRIP_GPIO);
 
-    // 1. Настройка GPIO
-    gpio_config_t io_conf = {
-        .mode = GPIO_MODE_OUTPUT,
-        .pin_bit_mask = (1ULL << led_gpio),
+    //Указал структуру конфига таймера для LEDC
+    ledc_timer_config_t my_timer_config = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .duty_resolution = LEDC_TIMER_8_BIT,
+        .timer_num = LEDC_TIMER_0,
+        .freq_hz = 1000,
+        .clk_cfg = LEDC_AUTO_CLK,
     };
-    ESP_ERROR_CHECK(gpio_config(&io_conf));
 
-    // 2. Создание GPTimer
-    gptimer_handle_t gptimer;
-    gptimer_config_t timer_config = {
-        .clk_src = GPTIMER_CLK_SRC_DEFAULT, // APB_CLK (80MHz)
-        .direction = GPTIMER_COUNT_UP,      // Счетчик растёт
-        .resolution_hz = 1 * 1000 * 1000,  // 1 МГц (1 тик = 1 мкс)
+    ledc_channel_config_t my_channel_config = {
+        .gpio_num = 18,
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = LEDC_CHANNEL_0,
+        .intr_type = LEDC_INTR_DISABLE,
+        .timer_sel = LEDC_TIMER_0,
+        .duty = 32,
+        .hpoint = 255, // максимальное разрешение duty(не точно)
+
     };
-    ESP_ERROR_CHECK(gptimer_new_timer(&timer_config, &gptimer));
 
-    // 3. Настройка alarm
-    gptimer_alarm_config_t alarm_config = {
-        .alarm_count = 1000000, // 1 секунда (1e6 тиков)
-        .reload_count = 0,
-        .flags = {
-            .auto_reload_on_alarm = true // Авто-перезагрузка
-        }
-    };
-    ESP_ERROR_CHECK(gptimer_set_alarm_action(gptimer, &alarm_config));
+    
+    ledc_timer_config(&my_timer_config);
+    ledc_channel_config(&my_channel_config);
 
-    // 4. Регистрация обработчика событий
-    gptimer_event_callbacks_t cbs = {
-        .on_alarm = alarm_callback // Обработчик alarm-события
-    };
-    ESP_ERROR_CHECK(gptimer_register_event_callbacks(gptimer, &cbs, NULL));
 
-    // 5. Включение таймера (это активирует прерывания)
-    ESP_ERROR_CHECK(gptimer_enable(gptimer));
-
-    // 6. Запуск таймера
-    ESP_ERROR_CHECK(gptimer_start(gptimer));
-
-    // 7. Бесконечный цикл
     while (1) {
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        
     }
 }
