@@ -64,9 +64,9 @@ void app_main()
         .gpio_num = 18,
         .speed_mode = LEDC_LOW_SPEED_MODE,
         .channel = LEDC_CHANNEL_0,
-        .intr_type = LEDC_INTR_DISABLE,
+        .intr_type = LEDC_INTR_FADE_END,
         .timer_sel = LEDC_TIMER_0,
-        .duty = 32,
+        .duty = 16,
         .hpoint = 255, // максимальное разрешение duty(не точно)
 
     };
@@ -75,6 +75,11 @@ void app_main()
     ledc_timer_config(&my_timer_config);
     ledc_channel_config(&my_channel_config);
 
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 254);
+
+    ledc_fade_func_install(ESP_INTR_FLAG_EDGE);
+    ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 254, 10000);
+    ledc_fade_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, LEDC_FADE_NO_WAIT);
 
     while (1) {
         
