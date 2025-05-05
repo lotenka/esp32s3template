@@ -20,18 +20,7 @@ void UserMQTTEventHndlr(int idx, void *handler_args, esp_event_base_t base, int3
 void SaveUserConf();
 
 
-static const char *TAG = "GPTimer Example";
 
-
-gpio_num_t led_gpio = LED_GPIO;
-bool led_state = false;
-
-// Обработчик alarm-события (вызывается в контексте прерывания)
-static void IRAM_ATTR alarm_callback(gptimer_handle_t timer, const void *ctx)
-{
-    led_state = !led_state;
-    gpio_set_level(led_gpio, led_state ? 1 : 0);
-}
 
 void app_main()
 {
@@ -60,7 +49,7 @@ void app_main()
         .clk_cfg = LEDC_AUTO_CLK,
     };
 
-    ledc_channel_config_t my_channel_config = {
+    ledc_channel_config_t my_channel_config_18 = {
         .gpio_num = 18,
         .speed_mode = LEDC_LOW_SPEED_MODE,
         .channel = LEDC_CHANNEL_0,
@@ -70,18 +59,37 @@ void app_main()
         .hpoint = 255, // максимальное разрешение duty(не точно)
 
     };
+    ledc_channel_config_t my_channel_config_17 = {
+        .gpio_num = 17,
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = LEDC_CHANNEL_1,
+        .intr_type = LEDC_INTR_FADE_END,
+        .timer_sel = LEDC_TIMER_0,
+        .duty = 16,
+        .hpoint = 255,
+
+    };
+
 
     
     ledc_timer_config(&my_timer_config);
-    ledc_channel_config(&my_channel_config);
+    ledc_channel_config(&my_channel_config_18);
+    ledc_channel_config(&my_channel_config_17);
 
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 254);
 
-    ledc_fade_func_install(ESP_INTR_FLAG_EDGE);
-    ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 254, 10000);
-    ledc_fade_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, LEDC_FADE_NO_WAIT);
+
+    ledc_fade_func_install(0);
 
     while (1) {
-        
+        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 254, 3000);
+        ledc_fade_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, LEDC_FADE_NO_WAIT);
+        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, 254, 3000);
+        ledc_fade_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, LEDC_FADE_NO_WAIT);
+
+        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 0, 3000);
+        ledc_fade_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, LEDC_FADE_NO_WAIT);
+        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, 0, 3000);
+        ledc_fade_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, LEDC_FADE_NO_WAIT);
     }
 }
