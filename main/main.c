@@ -11,13 +11,26 @@
 #include "webguiapp.h"
 #include "AppConfiguration.h"
 
-#define LED_GPIO    18  // GPIO для светодиода (GPIO21 по умолчанию на ESP32-S3)
-#define TIMER_GROUP 0   // Номер группы таймера (0 или 1)
-#define TIMER_IDX   0   // Номер таймера в группе (0 или 1)
 
 
 void UserMQTTEventHndlr(int idx, void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data);
 void SaveUserConf();
+
+
+void vTaskBlink(void *pvParameters){
+    //vTaskDelay(pdMS_TO_TICKS(5000));
+    ledc_channel_t *channel = pvParameters;
+    while (1){
+        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, *channel, 254, 10000);
+        ledc_fade_start(LEDC_LOW_SPEED_MODE, *channel, LEDC_FADE_NO_WAIT);
+
+        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, *channel, 1, 10000);
+        ledc_fade_start(LEDC_LOW_SPEED_MODE, *channel, LEDC_FADE_NO_WAIT);
+    }
+}
+
+
+
 
 
 
@@ -55,7 +68,7 @@ void app_main()
         .channel = LEDC_CHANNEL_0,
         .intr_type = LEDC_INTR_FADE_END,
         .timer_sel = LEDC_TIMER_0,
-        .duty = 16,
+        .duty = 2,
         .hpoint = 255, // максимальное разрешение duty(не точно)
 
     };
@@ -65,7 +78,7 @@ void app_main()
         .channel = LEDC_CHANNEL_1,
         .intr_type = LEDC_INTR_FADE_END,
         .timer_sel = LEDC_TIMER_0,
-        .duty = 16,
+        .duty = 2,
         .hpoint = 255,
 
     };
@@ -76,20 +89,32 @@ void app_main()
     ledc_channel_config(&my_channel_config_18);
     ledc_channel_config(&my_channel_config_17);
 
-    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 254);
+    //ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 254);
 
 
     ledc_fade_func_install(0);
 
-    while (1) {
-        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 254, 3000);
-        ledc_fade_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, LEDC_FADE_NO_WAIT);
-        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, 254, 3000);
-        ledc_fade_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, LEDC_FADE_NO_WAIT);
+    ledc_channel_t channels[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1};
+    xTaskCreate(
+        vTaskBlink,
+        "LEDC_blink_18",
+        1024,
+        &channels[0],
+        25,
+        NULL
+    );
 
-        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 0, 3000);
-        ledc_fade_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, LEDC_FADE_NO_WAIT);
-        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, 0, 3000);
-        ledc_fade_start(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, LEDC_FADE_NO_WAIT);
+
+    xTaskCreate(
+        vTaskBlink,
+        "LEDC_blink_17",
+        1024,
+        &channels[1],
+        25,
+        NULL
+    );
+
+    while (1) {
+
     }
 }

@@ -3,6 +3,7 @@
     "idf.flashType": "UART",
     "files.associations": {
         "unistd.h": "c",
-        "esp_err.h": "c"
+        "esp_err.h": "c",
+        "appconfiguration.h": "c"
     }
 }
