@@ -52,7 +52,7 @@ void app_main()
     ESP_ERROR_CHECK(InitAppConfig());
 
     LEDStripInit(CONFIG_LED_STRIP_GPIO);
-
+/*
     //Указал структуру конфига таймера для LEDC
     ledc_timer_config_t my_timer_config = {
         .speed_mode = LEDC_LOW_SPEED_MODE,
@@ -113,7 +113,7 @@ void app_main()
         25,
         NULL
     );
-
+*/
     while (1) {
 
     }

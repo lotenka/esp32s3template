@@ -25,6 +25,7 @@
 #include "AppConfiguration.h"
 #include "led_strip.h"
 #include "math.h"
+#include <driver/ledc.h>
 
 extern APP_CONFIG AppConfig;
 
@@ -76,6 +77,52 @@ static void funct_color(char *argres, int rw)
     }
 }
 
+static void funct_fade(char *argres, int rw)
+{
+    int fade_level = jRead_int(argres, "{'fade'", 0);
+
+    struct jWriteControl jwc;
+    jwOpen(&jwc, argres, VAR_MAX_VALUE_LENGTH, JW_OBJECT, JW_COMPACT);
+    jwObj_int(&jwc, "fade", fade_level);
+    jwEnd(&jwc);
+    jwClose(&jwc);
+
+        //Указал структуру конфига таймера для LEDC
+    ledc_timer_config_t my_timer_config = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .duty_resolution = LEDC_TIMER_8_BIT,
+        .timer_num = LEDC_TIMER_0,
+        .freq_hz = 1000,
+        .clk_cfg = LEDC_AUTO_CLK,
+    };
+    ledc_channel_config_t my_channel_config_18 = {
+        .gpio_num = 18,
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = LEDC_CHANNEL_0,
+        .intr_type = LEDC_INTR_FADE_END,
+        .timer_sel = LEDC_TIMER_0,
+        .duty = 2,
+        .hpoint = 255, // максимальное разрешение duty(не точно)
+
+    };
+    ledc_channel_config_t my_channel_config_17 = {
+        .gpio_num = 17,
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = LEDC_CHANNEL_1,
+        .intr_type = LEDC_INTR_FADE_END,
+        .timer_sel = LEDC_TIMER_0,
+        .duty = 2,
+        .hpoint = 255,
+
+    };
+    
+    ledc_timer_config(&my_timer_config);
+    ledc_channel_config(&my_channel_config_18);
+    ledc_channel_config(&my_channel_config_17);
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, fade_level);
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, fade_level);
+}
+
 const rest_var_t ApplicationVariables[] =
         {
                 /*FUNCTIONS*/
@@ -83,6 +130,7 @@ const rest_var_t ApplicationVariables[] =
                 { 0, "mytime", &funct_time, VAR_FUNCT, R, 0, 0 },
                 { 0, "myvar", &AppConfig.test, VAR_INT, R, 0, 0 },
                 { 0, "color", &funct_color, VAR_FUNCT, R, 0, 0 },
+                { 0, "fade", &funct_fade, VAR_FUNCT, RW, 0, 300 }
 
         };
 
