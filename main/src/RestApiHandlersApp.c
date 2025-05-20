@@ -81,12 +81,6 @@ static void funct_fade(char *argres, int rw)
 {
     int fade_level = jRead_int(argres, "{'fade'", 0);
 
-    struct jWriteControl jwc;
-    jwOpen(&jwc, argres, VAR_MAX_VALUE_LENGTH, JW_OBJECT, JW_COMPACT);
-    jwObj_int(&jwc, "fade", fade_level);
-    jwEnd(&jwc);
-    jwClose(&jwc);
-
         //Указал структуру конфига таймера для LEDC
     ledc_timer_config_t my_timer_config = {
         .speed_mode = LEDC_LOW_SPEED_MODE,
