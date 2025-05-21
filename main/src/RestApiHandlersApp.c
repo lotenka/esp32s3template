@@ -130,7 +130,7 @@ const rest_var_t ApplicationVariables[] =
                 { 0, "mytime", &funct_time, VAR_FUNCT, R, 0, 0 },
                 { 0, "myvar", &AppConfig.test, VAR_INT, R, 0, 0 },
                 { 0, "color", &funct_color, VAR_FUNCT, R, 0, 0 },
-                { 0, "fade", &funct_fade, VAR_FUNCT, RW, 0, 300 }
+                { 0, "fade", &funct_fade, VAR_FUNCT, RW, 0, 255 }
 
         };
 
