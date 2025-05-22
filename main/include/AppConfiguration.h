@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <driver/ledc.h>
 #include "CronTimers.h"
 #include "esp_netif.h"
 #include "led_strip.h"
@@ -65,6 +66,8 @@ void RegObjects(void);
 
 void LEDStripInit(int gpio);
 led_strip_handle_t * LEDStripGetHandle();
+
+void LEDC_config_init(void);
 
 
 #endif /* MAIN_INCLUDE_APPCONFIGURATION_H_ */

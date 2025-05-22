@@ -2,8 +2,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <driver/gpio.h>
-#include <driver/gptimer.h>
-#include <driver/ledc.h>
 #include <esp_err.h>
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
@@ -52,6 +50,7 @@ void app_main()
     ESP_ERROR_CHECK(InitAppConfig());
 
     LEDStripInit(CONFIG_LED_STRIP_GPIO);
+    LEDC_config_init();
 /*
     //Указал структуру конфига таймера для LEDC
     ledc_timer_config_t my_timer_config = {

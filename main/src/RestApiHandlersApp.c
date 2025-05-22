@@ -40,13 +40,13 @@ static void funct_time(char *argres, int rw)
 #define GAMMA_R  (1.70)
 #define GAMMA_G  (1.70)
 #define GAMMA_B  (1.70)
-
+/*
 static void LEDC_config_init()
 {
     ledc_timer_config_t my_timer_config = 
     {
         .speed_mode = LEDC_LOW_SPEED_MODE,
-        .duty_resolution = LEDC_TIMER_8_BIT,
+        .duty_resolution = LEDC_TIMER_7_BIT,
         .timer_num = LEDC_TIMER_0,
         .freq_hz = 1000,
         .clk_cfg = LEDC_AUTO_CLK,
@@ -59,7 +59,7 @@ static void LEDC_config_init()
         .intr_type = LEDC_INTR_FADE_END,
         .timer_sel = LEDC_TIMER_0,
         .duty = 2,
-        .hpoint = 255, // максимальное разрешение duty(не точно)
+        .hpoint = 127, // максимальное разрешение duty(не точно)
     };
     ledc_channel_config_t my_channel_config_17 = 
     {
@@ -69,13 +69,13 @@ static void LEDC_config_init()
         .intr_type = LEDC_INTR_FADE_END,
         .timer_sel = LEDC_TIMER_0,
         .duty = 2,
-        .hpoint = 255,
+        .hpoint = 127,
     };
     ledc_timer_config(&my_timer_config);
     ledc_channel_config(&my_channel_config_18);
     ledc_channel_config(&my_channel_config_17);
 }
-
+*/
 
 static int GammaCorrection(int input, float gamma)
 {
@@ -128,9 +128,9 @@ const rest_var_t ApplicationVariables[] =
                 /*FUNCTIONS*/
 
                 { 0, "mytime", &funct_time, VAR_FUNCT, R, 0, 0 },
-                { 0, "myvar", &AppConfig.test, VAR_INT, R, 0, 0 },
+                { 0, "myvar", &AppConfig.test, VAR_INT, RW, 0, 4 },
                 { 0, "color", &funct_color, VAR_FUNCT, R, 0, 0 },
-                { 0, "fade", &funct_fade, VAR_FUNCT, RW, 0, 255 }
+                { 0, "fade", &funct_fade, VAR_FUNCT, RW, 0, 127 }
 
         };
 
