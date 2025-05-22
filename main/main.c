@@ -51,6 +51,7 @@ void app_main()
 
     LEDStripInit(CONFIG_LED_STRIP_GPIO);
     LEDC_config_init();
+    
 /*
     //Указал структуру конфига таймера для LEDC
     ledc_timer_config_t my_timer_config = {
