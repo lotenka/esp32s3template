@@ -1,6 +1,8 @@
 #include "webguiapp.h"
 #include "AppConfiguration.h"
 
+ledc_channel_t ledc_channels[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1};
+int length = sizeof(ledc_channels) / sizeof(ledc_channels[0]);
 
 void LEDC_config_init()
 {

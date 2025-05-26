@@ -30,6 +30,9 @@
 
 extern APP_CONFIG AppConfig;
 
+extern ledc_channel_t ledc_channels[];
+extern int length;
+
 static void funct_time(char *argres, int rw)
 {
     time_t now;
@@ -81,13 +84,19 @@ static void funct_color(char *argres, int rw)
 static void funct_fade(char *argres, int rw)
 {
     int fade_level = jRead_int(argres, "{'fade'", 0);
-    
-    //LEDC_config_init();
+/*    
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, fade_level);
     ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, fade_level);
     ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1);
-}
+*/
+    for (int i = 0; i < length; i++)
+    {
+        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, ledc_channels[i], fade_level, 1500);
+        ledc_fade_start(LEDC_LOW_SPEED_MODE, ledc_channels[i], LEDC_FADE_NO_WAIT);
+    }
+
+    }
 
 const rest_var_t ApplicationVariables[] =
         {
