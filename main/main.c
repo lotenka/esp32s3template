@@ -29,15 +29,12 @@ void vTaskBlink(void *pvParameters){
 
 
 
-
-
-
-
 void app_main()
 {
     regUserEventHandler(&UserMQTTEventHndlr, NULL);
     regCustomSaveConf(&SaveUserConf);
     regCustomPayloadTypeHandler(NULL);
+    //LEDC_config_init();
     RegAppVariables();
     RegObjects();
 
@@ -51,8 +48,7 @@ void app_main()
 
     LEDStripInit(CONFIG_LED_STRIP_GPIO);
     LEDC_config_init();
-    
-/*
+    /*
     //Указал структуру конфига таймера для LEDC
     ledc_timer_config_t my_timer_config = {
         .speed_mode = LEDC_LOW_SPEED_MODE,

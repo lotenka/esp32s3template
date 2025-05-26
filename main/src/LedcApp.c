@@ -5,8 +5,8 @@ static bool initialized = false;
 
 void LEDC_config_init()
 {
-    //if (!initialized){
-    if(1){
+    if (!initialized){
+    //if(1){
         ledc_timer_config_t my_timer_config = 
         {
             .speed_mode = LEDC_LOW_SPEED_MODE,
