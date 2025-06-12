@@ -15,25 +15,23 @@
 void UserMQTTEventHndlr(int idx, void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data);
 void SaveUserConf();
 
-/*
-void vTaskBlink(void *pvParameters){
-    //vTaskDelay(pdMS_TO_TICKS(5000));
-    ledc_channel_t *channel = pvParameters;
-    while (1){
-        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, *channel, 254, 10000);
-        ledc_fade_start(LEDC_LOW_SPEED_MODE, *channel, LEDC_FADE_NO_WAIT);
 
-        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, *channel, 1, 10000);
-        ledc_fade_start(LEDC_LOW_SPEED_MODE, *channel, LEDC_FADE_NO_WAIT);
+void vTaskLedFadeSet(void *pvParameters)
+{
+    int result;
+    int raw_adc_data;
+    
+    while(1){
+        vTaskDelay(pdMS_TO_TICKS(50));
+        adc_oneshot_unit_handle_t *conf = pvParameters;
+        adc_oneshot_read(*conf, ADC_CHANNEL_5, &raw_adc_data);
+        result = raw_adc_data * 995 / 4095 * 11;
+        int fade_level = result / 37.6;
+        ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, fade_level);
+        ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);  
     }
 }
-*/
-/*
-void vTaskLedSet(void *pvParameters)
-{
 
-}
-*/
 
 void vTaskAdcInputShow(void *pvParameters){
     int raw_adc_data;
@@ -91,27 +89,9 @@ void app_main()
     gpio_set_level(9, 1);
     gpio_set_level(17, 1);
     */
-    /*
-    ledc_channel_t channels[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1};
-    xTaskCreate(
-        vTaskBlink,
-        "LEDC_blink_18",
-        1024,
-        &channels[0],
-        25,
-        NULL
-    );
+    
+//    ledc_channel_t channels[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1};
 
-
-    xTaskCreate(
-        vTaskBlink,
-        "LEDC_blink_17",
-        1024,
-        &channels[1],
-        25,
-        NULL
-    );
-*/
     xTaskCreate(
         vTaskAdcInputShow,
         "ADC_input",
@@ -120,9 +100,9 @@ void app_main()
         25,
         NULL
     );
-/*
+
     xTaskCreate(
-        vLedFadeSet,
+        vTaskLedFadeSet,
         "Ledc_fade",
         4096,
         &adc1_handle,
@@ -130,7 +110,6 @@ void app_main()
         NULL
     );
     
-*/
     int raw_adc_data;
     float result;
     while (1) {
