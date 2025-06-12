@@ -32,6 +32,7 @@ extern APP_CONFIG AppConfig;
 
 extern ledc_channel_t ledc_channels[];
 extern int length;
+extern int result;
 
 static void funct_time(char *argres, int rw)
 {
@@ -84,16 +85,14 @@ static void funct_color(char *argres, int rw)
 static void funct_fade(char *argres, int rw)
 {
     int fade_level = jRead_int(argres, "{'fade'", 0);
-/*    
-    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, fade_level);
-    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
-    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, fade_level);
-    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1);
-*/
     for (int i = 0; i < length; i++)
     {
-        ledc_set_fade_with_time(LEDC_LOW_SPEED_MODE, ledc_channels[i], fade_level, 1500);
+        ledc_set_fade_with_step(LEDC_LOW_SPEED_MODE, ledc_channels[i], fade_level, 5, 50);
         ledc_fade_start(LEDC_LOW_SPEED_MODE, ledc_channels[i], LEDC_FADE_NO_WAIT);
+        /*    
+        ledc_set_duty(LEDC_LOW_SPEED_MODE, ledc_channels[i], fade_level);
+        ledc_update_duty(LEDC_LOW_SPEED_MODE, ledc_channels[i]);  
+        */
     }
 
     }
@@ -103,7 +102,7 @@ const rest_var_t ApplicationVariables[] =
                 /*FUNCTIONS*/
 
                 { 0, "mytime", &funct_time, VAR_FUNCT, R, 0, 0 },
-                { 0, "myvar", &AppConfig.test, VAR_INT, RW, 0, 4 },
+                { 0, "myvar", &AppConfig.test, VAR_INT, RW, 0, 1000000 },
                 { 0, "color", &funct_color, VAR_FUNCT, R, 0, 0 },
                 { 0, "fade", &funct_fade, VAR_FUNCT, RW, 0, 255 }
 

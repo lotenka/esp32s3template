@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <driver/gpio.h>
+#include <esp_adc/adc_oneshot.h>
 #include <esp_err.h>
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
@@ -27,6 +28,25 @@ void vTaskBlink(void *pvParameters){
     }
 }
 */
+/*
+void vTaskLedSet(void *pvParameters)
+{
+
+}
+*/
+
+void vTaskAdcInputShow(void *pvParameters){
+    int raw_adc_data;
+    int result;
+    while (1)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        adc_oneshot_unit_handle_t *conf = pvParameters;
+        adc_oneshot_read(*conf, ADC_CHANNEL_5, &raw_adc_data);
+        result = raw_adc_data * 995 / 4095 * 11;
+        printf("adc_result = %d mV\n", result);
+    }
+}
 
 
 void app_main()
@@ -45,9 +65,32 @@ void app_main()
     }
     ESP_ERROR_CHECK(InitAppConfig());
 
-    LEDStripInit(CONFIG_LED_STRIP_GPIO);
     LEDC_config_init();
-    ledc_fade_func_install(0);
+    //ledc_fade_func_install(0);
+
+    adc_oneshot_unit_init_cfg_t my_adc_unit_config =
+    {
+        .unit_id = ADC_UNIT_1,
+        //.ulp_mode = ADC_ULP_MODE_DISABLE,
+    };
+
+    adc_oneshot_unit_handle_t adc1_handle;
+    adc_oneshot_new_unit(&my_adc_unit_config, &adc1_handle);
+    
+    adc_oneshot_chan_cfg_t my_config =
+    {
+        .bitwidth = ADC_BITWIDTH_12,
+        .atten = ADC_ATTEN_DB_0,
+    };
+
+    adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_5, &my_config);     //почему каналов только 10?
+
+    /*
+    gpio_set_direction(17, GPIO_MODE_DEF_OUTPUT);
+    gpio_set_direction(9, GPIO_MODE_INPUT);
+    gpio_set_level(9, 1);
+    gpio_set_level(17, 1);
+    */
     /*
     ledc_channel_t channels[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1};
     xTaskCreate(
@@ -69,7 +112,29 @@ void app_main()
         NULL
     );
 */
+    xTaskCreate(
+        vTaskAdcInputShow,
+        "ADC_input",
+        4096,
+        &adc1_handle,
+        25,
+        NULL
+    );
+/*
+    xTaskCreate(
+        vLedFadeSet,
+        "Ledc_fade",
+        4096,
+        &adc1_handle,
+        25,
+        NULL
+    );
+    
+*/
+    int raw_adc_data;
+    float result;
     while (1) {
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
     }
 }
