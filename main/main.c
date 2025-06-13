@@ -15,12 +15,11 @@
 void UserMQTTEventHndlr(int idx, void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data);
 void SaveUserConf();
 
+int result;
+int raw_adc_data;
 
 void vTaskLedFadeSet(void *pvParameters)
-{
-    int result;
-    int raw_adc_data;
-    
+{    
     while(1){
         vTaskDelay(pdMS_TO_TICKS(50));
         adc_oneshot_unit_handle_t *conf = pvParameters;
@@ -34,13 +33,9 @@ void vTaskLedFadeSet(void *pvParameters)
 
 
 void vTaskAdcInputShow(void *pvParameters){
-    int raw_adc_data;
-    int result;
     while (1)
     {
         vTaskDelay(pdMS_TO_TICKS(1000));
-        adc_oneshot_unit_handle_t *conf = pvParameters;
-        adc_oneshot_read(*conf, ADC_CHANNEL_5, &raw_adc_data);
         result = raw_adc_data * 995 / 4095 * 11;
         printf("adc_result = %d mV\n", result);
     }
@@ -95,8 +90,8 @@ void app_main()
     xTaskCreate(
         vTaskAdcInputShow,
         "ADC_input",
-        4096,
-        &adc1_handle,
+        2048,
+        0,
         25,
         NULL
     );
