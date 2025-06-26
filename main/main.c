@@ -17,27 +17,62 @@ void SaveUserConf();
 
 int result;
 int raw_adc_data;
+adc_channel_t adc_channels[4] = {ADC_CHANNEL_8, ADC_CHANNEL_7, ADC_CHANNEL_6, ADC_CHANNEL_5};
+gpio_num_t control_channels[6] = {GPIO_NUM_11, GPIO_NUM_12, GPIO_NUM_13, GPIO_NUM_35, GPIO_NUM_34, GPIO_NUM_33};
+int adc_data_matrix[4][8];
+
 
 void vTaskLedFadeSet(void *pvParameters)
 {    
     while(1){
         vTaskDelay(pdMS_TO_TICKS(50));
         adc_oneshot_unit_handle_t *conf = pvParameters;
-        adc_oneshot_read(*conf, ADC_CHANNEL_5, &raw_adc_data);
-        result = raw_adc_data * 995 / 4095 * 11;
-        int fade_level = result / 37.6;
-        ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, fade_level);
-        ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);  
+        for (int i = 0; i < 4; i++)
+        {
+            adc_channel_t channel = adc_channels[i];
+            if (i > 1){
+                for (int j = 0; j < 8; j++)
+                {
+                    gpio_set_level(control_channels[0], j & 1);
+                    gpio_set_level(control_channels[1], j & 10);
+                    gpio_set_level(control_channels[2], j & 100);
+                    adc_oneshot_read(*conf, adc_channels[i], &raw_adc_data);
+                    result = raw_adc_data * 995 / 4095 * 11;
+                    adc_data_matrix[i][j] = result;
+
+                }
+            }
+
+            //Case for ADC which are controlled by bus S3 S4 S5
+            else
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    gpio_set_level(control_channels[3], j & 1);
+                    gpio_set_level(control_channels[4], j & 10);
+                    gpio_set_level(control_channels[5], j & 100);
+                    adc_oneshot_read(*conf, adc_channels[i], &raw_adc_data);
+                    result = raw_adc_data * 995 / 4095 * 11;
+                    adc_data_matrix[i][j] = result;
+                }
+            }
+        }    
     }
 }
 
 
 void vTaskAdcInputShow(void *pvParameters){
-    while (1)
-    {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        result = raw_adc_data * 995 / 4095 * 11;
-        printf("adc_result = %d mV\n", result);
+    while(1){
+        vTaskDelay(pdMS_TO_TICKS(5000));
+        for (int i = 0; i < 4; i++)
+        {
+            printf("\nADC_CHANNEL_%d\n", 8 - i);
+            for (int j = 0; j < 8; j++)
+            {
+                printf("Y%d: %dmV\t\t", j, adc_data_matrix[i][j]);
+            }
+        }
+        printf("\n\n\t\t32In info");
     }
 }
 
@@ -76,16 +111,20 @@ void app_main()
         .atten = ADC_ATTEN_DB_0,
     };
 
-    adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_5, &my_config);     //почему каналов только 10?
-
-    /*
-    gpio_set_direction(17, GPIO_MODE_DEF_OUTPUT);
-    gpio_set_direction(9, GPIO_MODE_INPUT);
-    gpio_set_level(9, 1);
-    gpio_set_level(17, 1);
-    */
-    
+    adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_5, &my_config);
+    adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_6, &my_config);
+    adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_7, &my_config);
+    adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_8, &my_config);
 //    ledc_channel_t channels[] = {LEDC_CHANNEL_0, LEDC_CHANNEL_1};
+    gpio_set_direction(11, GPIO_MODE_OUTPUT);
+    gpio_set_direction(12, GPIO_MODE_OUTPUT);
+    gpio_set_direction(13, GPIO_MODE_OUTPUT);
+    
+    gpio_set_direction(33, GPIO_MODE_OUTPUT);
+    gpio_set_direction(34, GPIO_MODE_OUTPUT);
+    gpio_set_direction(35, GPIO_MODE_OUTPUT);
+    
+
 
     xTaskCreate(
         vTaskAdcInputShow,
